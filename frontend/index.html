@@ -646,278 +646,215 @@
 
   </div>
 </div>
-
 <script>
-  // --- STATE MANAGEMENT ---
-  const state = {
-    isLoggedIn: false,
-    user: null,
-    file: null
-  };
+const BACKEND_URL = "https://contract-clause-jvhl.onrender.com";
 
-  // --- UI REFERENCES ---
-  const dropZone = document.getElementById('dropZone');
-  const fileInput = document.getElementById('pdfInput');
-  const userNav = document.getElementById('userNav');
-  
-  // --- CLICK OUTSIDE TO CLOSE DROPDOWN ---
-  document.addEventListener('click', (e) => {
-    // Only close if we are logged in (dropdown visible) and click is outside
-    if (state.isLoggedIn && !userNav.contains(e.target)) {
-      userNav.classList.remove('active');
-    }
-  });
+const state = {
+  isLoggedIn: false,
+  user: null,
+  file: null
+};
 
-  // --- DRAG & DROP LOGIC ---
-  dropZone.addEventListener('click', () => fileInput.click());
-  
-  dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropZone.classList.add('drag-over');
-  });
-  
-  dropZone.addEventListener('dragleave', () => {
-    dropZone.classList.remove('drag-over');
-  });
-  
-  dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropZone.classList.remove('drag-over');
-    if (e.dataTransfer.files.length) {
-      fileInput.files = e.dataTransfer.files;
-      handleFileSelect(fileInput);
-    }
-  });
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('pdfInput');
+const userNav = document.getElementById('userNav');
 
-  function handleFileSelect(input) {
-    if (input.files && input.files[0]) {
-      state.file = input.files[0];
-      document.querySelector('.upload-content').style.display = 'none';
-      const info = document.getElementById('fileInfo');
-      info.style.display = 'block';
-      document.getElementById('fileName').textContent = state.file.name;
-      document.getElementById('errorMsg').style.display = 'none';
-    }
+document.addEventListener('click', (e) => {
+  if (state.isLoggedIn && !userNav.contains(e.target)) {
+    userNav.classList.remove('active');
   }
-
-  function clearFile(e) {
-    e.stopPropagation();
-    state.file = null;
-    fileInput.value = ''; // Reset input
-    document.querySelector('.upload-content').style.display = 'block';
-    document.getElementById('fileInfo').style.display = 'none';
-    document.getElementById('results').innerHTML = '';
-  }
-
-  // --- AUTHENTICATION LOGIC ---
-  function openAuthModal(mode) {
-    document.getElementById('authModal').classList.add('active');
-    switchTab(mode);
-  }
-
-  function closeAuthModal() {
-    document.getElementById('authModal').classList.remove('active');
-  }
-
-  function switchTab(mode) {
-    const loginForm = document.getElementById('loginForm');
-    const signupForm = document.getElementById('signupForm');
-    const loginTab = document.getElementById('tab-login');
-    const signupTab = document.getElementById('tab-signup');
-
-    if (mode === 'login') {
-      loginForm.style.display = 'block';
-      signupForm.style.display = 'none';
-      loginTab.classList.add('active');
-      signupTab.classList.remove('active');
-    } else {
-      loginForm.style.display = 'none';
-      signupForm.style.display = 'block';
-      loginTab.classList.remove('active');
-      signupTab.classList.add('active');
-    }
-  }
-
-  function handleAuth(e, type) {
-    e.preventDefault();
-    const btn = e.target.querySelector('button');
-    const originalText = btn.innerText;
-    
-    // Simulate API call
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Verifying...';
-
-    setTimeout(() => {
-      state.isLoggedIn = true;
-      state.user = { name: type === 'login' ? 'Demo User' : 'New User' };
-      
-      // Update Navbar
-      document.getElementById('guestNav').style.display = 'none';
-      const userNav = document.getElementById('userNav');
-      userNav.style.display = 'flex';
-      
-      document.getElementById('userNameDisplay').innerText = state.user.name;
-      document.getElementById('userInitials').innerText = state.user.name.charAt(0);
-
-      closeAuthModal();
-      btn.disabled = false;
-      btn.innerText = originalText;
-    }, 1500);
-  }
-
-  // --- DROPDOWN & LOGOUT ---
-  function toggleUserDropdown() {
-    document.getElementById('userNav').classList.toggle('active');
-  }
-
-  function logout() {
-    // 1. Clear State
-    state.isLoggedIn = false;
-    state.user = null;
-    state.file = null;
-
-    // 2. Update Navbar UI
-    document.getElementById('guestNav').style.display = 'flex';
-    document.getElementById('userNav').style.display = 'none';
-    document.getElementById('userNav').classList.remove('active');
-
-    // 3. Clear App Data (Security)
-    document.getElementById('results').innerHTML = '';
-    document.getElementById('pdfInput').value = '';
-    
-    document.getElementById('dropZone').querySelector('.upload-content').style.display = 'block';
-    document.getElementById('fileInfo').style.display = 'none';
-    
-    // 4. Feedback
-    // alert('You have been logged out.'); // Optional, removing for smoother UX
-  }
-
-  // --- ANALYSIS LOGIC ---
-  async function analyzeContract() {
-    const errorMsg = document.getElementById('errorMsg');
-    const resultsDiv = document.getElementById('results');
-    const loader = document.getElementById('loader');
-    const btn = document.getElementById('analyzeBtn');
-
-    // 1. Validation
-    if (!state.file) {
-      errorMsg.textContent = "Please upload a PDF contract first.";
-      errorMsg.style.display = 'block';
-      shakeElement(document.querySelector('.upload-area'));
-      return;
-    }
-
-    if (!state.isLoggedIn) {
-      openAuthModal('login');
-      return;
-    }
-
-    // 2. Set Loading State
-    errorMsg.style.display = 'none';
-    resultsDiv.innerHTML = '';
-    loader.style.display = 'block';
-    btn.disabled = true;
-    btn.innerHTML = 'Scanning Document...';
-
-    // 3. Prepare Request
-    const formData = new FormData();
-    formData.append('file', state.file);
-
-    try {
-      // NOTE: Connecting to your local backend as requested
-    const BACKEND_URL = "https://contract-clause.onrender.com";
-
-const res = await fetch(`${BACKEND_URL}/analyze`, {
-    method: "POST",
-    body: formData
 });
 
-      if (!res.ok) throw new Error(`Server Error: ${res.status}`);
-      const data = await res.json();
+dropZone.addEventListener('click', () => fileInput.click());
 
-      loader.style.display = 'none';
-      btn.disabled = false;
-      btn.innerHTML = 'Analyze Document';
+dropZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  dropZone.classList.add('drag-over');
+});
 
-      if (!data.clauses || data.clauses.length === 0) {
-        throw new Error(data.message || 'No clauses found.');
-      }
+dropZone.addEventListener('dragleave', () => {
+  dropZone.classList.remove('drag-over');
+});
 
-      // 4. Render Results
-      renderResults(data.clauses);
+dropZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  if (e.dataTransfer.files.length) {
+    fileInput.files = e.dataTransfer.files;
+    handleFileSelect(fileInput);
+  }
+});
 
-    } catch (err) {
-      loader.style.display = 'none';
-      btn.disabled = false;
-      btn.innerHTML = 'Analyze Document';
-      
-      console.error(err);
-      
-      let msg = "Analysis Failed: " + err.message;
-      if(err.message.includes('fetch') || err.message.includes('Network')) {
-        msg = "Unable to connect to analysis server (localhost:8001). Please ensure your backend is running.";
-      }
-      
-      errorMsg.textContent = msg;
-      errorMsg.style.display = 'block';
-    }
+function handleFileSelect(input) {
+  if (input.files && input.files[0]) {
+    state.file = input.files[0];
+    document.querySelector('.upload-content').style.display = 'none';
+    const info = document.getElementById('fileInfo');
+    info.style.display = 'block';
+    document.getElementById('fileName').textContent = state.file.name;
+    document.getElementById('errorMsg').style.display = 'none';
+  }
+}
+
+function clearFile(e) {
+  e.stopPropagation();
+  state.file = null;
+  fileInput.value = '';
+  document.querySelector('.upload-content').style.display = 'block';
+  document.getElementById('fileInfo').style.display = 'none';
+  document.getElementById('results').innerHTML = '';
+}
+
+function toggleUserDropdown() {
+  document.getElementById('userNav').classList.toggle('active');
+}
+
+function logout() {
+  state.isLoggedIn = false;
+  state.user = null;
+  state.file = null;
+
+  document.getElementById('guestNav').style.display = 'flex';
+  document.getElementById('userNav').style.display = 'none';
+  document.getElementById('results').innerHTML = '';
+  fileInput.value = '';
+}
+
+function openAuthModal(mode) {
+  document.getElementById('authModal').classList.add('active');
+}
+
+function closeAuthModal() {
+  document.getElementById('authModal').classList.remove('active');
+}
+
+function handleAuth(e) {
+  e.preventDefault();
+  state.isLoggedIn = true;
+  state.user = { name: "Demo User" };
+
+  document.getElementById('guestNav').style.display = 'none';
+  document.getElementById('userNav').style.display = 'flex';
+  document.getElementById('userNameDisplay').innerText = "Demo User";
+  document.getElementById('userInitials').innerText = "D";
+
+  closeAuthModal();
+}
+
+async function analyzeContract() {
+  const errorMsg = document.getElementById('errorMsg');
+  const resultsDiv = document.getElementById('results');
+  const loader = document.getElementById('loader');
+  const btn = document.getElementById('analyzeBtn');
+
+  if (!state.file) {
+    errorMsg.textContent = "Please upload a PDF contract first.";
+    errorMsg.style.display = 'block';
+    return;
   }
 
-  function renderResults(clauses) {
-    const container = document.getElementById('results');
-    
-    clauses.forEach((c, index) => {
-      // Determine Styles based on score
-      let badgeClass = 'badge-high'; // Green
-      let color = '#10b981';
-      let icon = 'fa-check-shield';
-      
-      if (c.confidence_score < 70) { 
-        badgeClass = 'badge-med'; 
-        color = '#f59e0b'; 
-        icon = 'fa-triangle-exclamation'; 
-      }
-      if (c.confidence_score < 50) { 
-        badgeClass = 'badge-low'; 
-        color = '#ef4444'; 
-        icon = 'fa-skull-crossbones'; 
-      }
+  if (!state.isLoggedIn) {
+    openAuthModal();
+    return;
+  }
 
-      const html = `
-        <div class="result-item" style="border-color:${color}; animation-delay:${index * 0.1}s">
-          <div class="result-header">
-            <div style="display:flex; align-items:center; gap:0.5rem; font-weight:700; color:#fff">
-              <i class="fa-solid ${icon}" style="color:${color}"></i>
-              ${c.clause_type || 'General Clause'}
-            </div>
-            <span class="badge ${badgeClass}">${c.confidence_score}% Confidence</span>
+  errorMsg.style.display = 'none';
+  resultsDiv.innerHTML = '';
+  loader.style.display = 'block';
+  btn.disabled = true;
+  btn.innerHTML = "Scanning Document...";
+
+  const formData = new FormData();
+  formData.append("file", state.file);
+
+  try {
+    const res = await fetch(`${BACKEND_URL}/analyze`, {
+      method: "POST",
+      body: formData
+    });
+
+    if (!res.ok) {
+      throw new Error("Server Error: " + res.status);
+    }
+
+    const data = await res.json();
+
+    loader.style.display = 'none';
+    btn.disabled = false;
+    btn.innerHTML = "Analyze Document";
+
+    if (!data.clauses || data.clauses.length === 0) {
+      errorMsg.textContent = "No clauses found in document.";
+      errorMsg.style.display = 'block';
+      return;
+    }
+
+    renderResults(data.clauses);
+
+  } catch (err) {
+    loader.style.display = 'none';
+    btn.disabled = false;
+    btn.innerHTML = "Analyze Document";
+
+    console.error(err);
+
+    errorMsg.textContent =
+      "Unable to connect to analysis server. If first request, wait 30–60 seconds (Render cold start) and try again.";
+    errorMsg.style.display = 'block';
+  }
+}
+
+function renderResults(clauses) {
+  const container = document.getElementById('results');
+
+  clauses.forEach((c, index) => {
+    let badgeClass = 'badge-high';
+    let color = '#10b981';
+    let icon = 'fa-check-shield';
+
+    if (c.confidence_score < 70) {
+      badgeClass = 'badge-med';
+      color = '#f59e0b';
+      icon = 'fa-triangle-exclamation';
+    }
+
+    if (c.confidence_score < 50) {
+      badgeClass = 'badge-low';
+      color = '#ef4444';
+      icon = 'fa-skull-crossbones';
+    }
+
+    container.innerHTML += `
+      <div class="result-item" style="border-color:${color}">
+        <div class="result-header">
+          <div style="display:flex; align-items:center; gap:0.5rem; font-weight:700; color:#fff">
+            <i class="fa-solid ${icon}" style="color:${color}"></i>
+            ${c.clause_type}
           </div>
-          
-          <div class="clause-text">
-            "${c.extracted_text || 'Text not extracted'}"
-          </div>
-          
-          <div class="ai-insight">
-            <i class="fa-solid fa-robot"></i>
-            <div>
-              <strong style="display:block; margin-bottom:0.2rem; color:#fff">AI Analysis</strong>
-              ${c.risk_flag_reason || 'No specific risks detected.'}
-            </div>
+          <span class="badge ${badgeClass}">
+            ${c.confidence_score}% Confidence
+          </span>
+        </div>
+
+        <div class="clause-text">
+          "${c.extracted_text}"
+        </div>
+
+        <div class="ai-insight">
+          <i class="fa-solid fa-robot"></i>
+          <div>
+            <strong style="color:#fff">AI Analysis</strong><br>
+            ${c.risk_flag_reason}
           </div>
         </div>
-      `;
-      container.innerHTML += html;
-    });
-  }
-
-  function shakeElement(el) {
-    el.style.transform = "translateX(5px)";
-    setTimeout(() => el.style.transform = "translateX(-5px)", 100);
-    setTimeout(() => el.style.transform = "translateX(5px)", 200);
-    setTimeout(() => el.style.transform = "translateX(0)", 300);
-  }
+      </div>
+    `;
+  });
+}
 </script>
+
 
 </body>
 
 </html>
+
