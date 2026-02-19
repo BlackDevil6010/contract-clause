@@ -10,12 +10,13 @@ app = FastAPI(title="Contract Risk Analyzer – MVP")
 # ==============================
 
 origins = [
-    "https://contract-clause-d4bd.vercel.app",  # ✅ Your Vercel frontend
+    "https://contract-clause-d4bd.vercel.app",
+    "https://contract-clause-d4bd.vercel.app/",
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],  # TEMPORARY for debugging
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -141,3 +142,4 @@ async def analyze_contract(file: UploadFile = File(...)):
 @app.get("/")
 async def root():
     return {"message": "Contract Risk Analyzer API is running 🚀"}
+
