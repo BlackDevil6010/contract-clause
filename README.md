@@ -1,3 +1,5 @@
+MY-LogiC – AI Contract Intelligence
+
 MY-LogiC** is a simple, modern web application that allows users to upload legal contracts (PDFs), automatically extract clauses, classify them, and assign basic risk scores + explanations.
 
 Built as an MVP to demonstrate AI-assisted contract review.
