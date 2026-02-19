@@ -768,10 +768,13 @@ async function analyzeContract() {
   formData.append("file", state.file);
 
   try {
-    const res = await fetch(`${BACKEND_URL}/analyze`, {
-      method: "POST",
-      body: formData
-    });
+    const res = await fetch(
+      "https://contract-clause-jvhl.onrender.com/analyze",
+      {
+        method: "POST",
+        body: formData
+      }
+    );
 
     if (!res.ok) {
       throw new Error("Server Error: " + res.status);
@@ -796,12 +799,14 @@ async function analyzeContract() {
     btn.disabled = false;
     btn.innerHTML = "Analyze Document";
 
-    console.error(err);
+    console.error("FETCH ERROR:", err);
 
     errorMsg.textContent =
       "Unable to connect to analysis server. If first request, wait 30–60 seconds (Render cold start) and try again.";
     errorMsg.style.display = 'block';
   }
+}
+
 }
 
 function renderResults(clauses) {
@@ -857,4 +862,5 @@ function renderResults(clauses) {
 </body>
 
 </html>
+
 
